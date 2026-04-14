@@ -1,0 +1,97 @@
+{
+  "_note": "Static seed data — loaded on server start",
+  "trainers": [
+    "AJITH V",
+    "ASHISH",
+    "SOORAJ",
+    "SREEDEVI",
+    "FATHIMA THAZNEEM",
+    "JANET PJ",
+    "ALTHAF",
+    "ANWAR",
+    "RAJAB",
+    "GHEEVARGHESE",
+    "ANANDHU",
+    "RISWAN"
+  ],
+  "sample_feedbacks": [
+    {
+      "id": 1,
+      "trainer": "Web Exploitation Trainer",
+      "rating": 5,
+      "feedback": "The SQL injection lab was incredibly well structured.",
+      "email": "arjun.nair@gmail.com",
+      "submitted_at": "2026-04-10T09:15:00Z"
+    },
+    {
+      "id": 2,
+      "trainer": "Cyber Security Trainer",
+      "rating": 4,
+      "feedback": "Network scanning session was eye-opening.",
+      "email": "priya.thomas@outlook.com",
+      "submitted_at": "2026-04-10T11:30:00Z"
+    }
+  ],
+  "feedbacks": [
+    {
+      "id": 1,
+      "name": "Arjun Nair",
+      "email": "arjun.nair@gmail.com",
+      "course": "OCSP",
+      "batchDate": "2026-04-10",
+      "trainer": "Web Exploitation Trainer",
+      "mode": "Offline",
+      "ratings": {
+        "regularity": "Excellent",
+        "punctuality": "Good",
+        "teaching": "Excellent"
+      },
+      "trainerThoughts": "The SQL injection lab was incredibly well structured.",
+      "challenges": "None so far, everything was well explained.",
+      "nonTech": "Support staff were very helpful and responsive.",
+      "additionalSupport": "More hands-on labs would be great.",
+      "suggestions": "Keep the current pace, it works perfectly.",
+      "submitted_at": "2026-04-10T09:15:00Z"
+    },
+    {
+      "id": 2,
+      "name": "Priya Thomas",
+      "email": "priya.thomas@outlook.com",
+      "course": "ADIS",
+      "batchDate": "2026-04-10",
+      "trainer": "Cyber Security Trainer",
+      "mode": "Online",
+      "ratings": {
+        "regularity": "Good",
+        "punctuality": "Good",
+        "teaching": "Satisfactory"
+      },
+      "trainerThoughts": "Network scanning session was eye-opening.",
+      "challenges": "Internet connectivity sometimes caused issues during live demos.",
+      "nonTech": "Doubt-clearing sessions were very helpful.",
+      "additionalSupport": "Recording of sessions would help a lot.",
+      "suggestions": "Provide session recordings for review.",
+      "submitted_at": "2026-04-10T11:30:00Z"
+    },
+    {
+      "id": 3,
+      "name": "Anjana",
+      "email": "ajana01@gmail.com",
+      "course": "ADIS",
+      "batchDate": "2026-04-09",
+      "trainer": "JANET PJ",
+      "mode": "Offline",
+      "ratings": {
+        "regularity": "Excellent",
+        "punctuality": "Good",
+        "teaching": "Satisfactory"
+      },
+      "trainerThoughts": "good",
+      "challenges": "no",
+      "nonTech": "its really good",
+      "additionalSupport": "need more labs",
+      "suggestions": "none",
+      "submitted_at": "2026-04-14T12:01:36.647Z"
+    }
+  ]
+}
