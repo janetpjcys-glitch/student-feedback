@@ -69,17 +69,19 @@ const feedbackDB = [
 app.get("/api/trainers", (req, res) => {
   res.json([
     "AJITH V",
-    "ASHISH",
-    "SOORAJ",
-    "SREEDEVI",
+    "ASHISH THOMAS JOSEPH",
+    "SOORAJ K",
+    "SREEDEVI S NAIR",
     "FATHIMA THAZNEEM",
     "JANET PJ",
-    "ALTHAF",
-    "ANWAR",
-    "RAJAB",
-    "GHEEVARGHESE",
+    "ALTHAF SHAJAHAN",
+    "ANWAR SWADIQUE",
+    "RAJAB P",
+    "GEEVARGHESE K THOMAS",
     "ANANDHU",
-    "RISWAN",
+    "MUHAMMED RISWAN S",
+    "GOWRISHANKAR",
+    "MOHAMMED SUHAIL"
   ]);
 });
 
