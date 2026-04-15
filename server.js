@@ -76,12 +76,8 @@ app.get("/api/trainers", (req, res) => {
     "JANET PJ",
     "ALTHAF SHAJAHAN",
     "ANWAR SWADIQUE",
-    "RAJAB P",
-    "GEEVARGHESE K THOMAS",
-    "ANANDHU",
     "MUHAMMED RISWAN S",
-    "GOWRISHANKAR",
-    "MOHAMMED SUHAIL"
+    "GOWRISHANKAR"
   ]);
 });
 
