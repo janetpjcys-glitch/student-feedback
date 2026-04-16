@@ -10,19 +10,19 @@ const matrixRatings = {
   teaching:    "",
 };
 
-// ── Email validation — ONLY accepts @gmail.com addresses ──────────
-// Accepts:  name@gmail.com  john.doe123@gmail.com
-// Rejects:  ems  ema@  em@gmail  name@yahoo.com  name@outlook.com  test@test.com
+// ── Email validation — only accepts valid email formats ───────────
 function isValidEmail(email) {
-  const trimmed = email.trim().toLowerCase();
+  const trimmed = email.trim();
 
-  // Must match: something@gmail.com exactly
-  const regex = /^[a-zA-Z0-9._%+\-]+@gmail\.com$/;
+  const regex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
   if (!regex.test(trimmed)) return false;
 
-  // Must have at least 1 character before @
-  const local = trimmed.split("@")[0];
+  const [local, domain] = trimmed.split("@");
   if (!local || local.length < 1) return false;
+
+  if (!domain || !domain.includes(".")) return false;
+  const tld = domain.split(".").pop();
+  if (!tld || tld.length < 2) return false;
 
   return true;
 }
