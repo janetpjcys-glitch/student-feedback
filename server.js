@@ -6,15 +6,13 @@
 
 const express = require("express");
 const path    = require("path");
-const fs      = require("fs");                          // ← ADDED
+const fs      = require("fs");
 const app     = express();
 const PORT    = process.env.PORT || 3000;
 
-// ── Path to data.json ─────────────────────────────────────────────
-const DATA_FILE = path.join(__dirname, "data.json");   // ← ADDED
+const DATA_FILE = path.join(__dirname, "data.json");
 
-// ── Helper: write feedbackDB back to data.json ────────────────────
-function saveToFile() {                                 // ← ADDED
+function saveToFile() {
   try {
     const raw  = fs.readFileSync(DATA_FILE, "utf8");
     const json = JSON.parse(raw);
@@ -37,7 +35,7 @@ const feedbackDB = [
     email: "arjun.nair@gmail.com",
     course: "OCSP",
     batchDate: "2026-04-10",
-    trainer: "Web Exploitation Trainer",
+    trainer: "AJITH V",
     mode: "Offline",
     ratings: { regularity: "Excellent", punctuality: "Good", teaching: "Excellent" },
     trainerThoughts: "The SQL injection lab was incredibly well structured.",
@@ -50,10 +48,10 @@ const feedbackDB = [
   {
     id: 2,
     name: "Priya Thomas",
-    email: "priya.thomas@outlook.com",
+    email: "priya.thomas@gmail.com",
     course: "ADIS",
     batchDate: "2026-04-10",
-    trainer: "Cyber Security Trainer",
+    trainer: "JANET PJ",
     mode: "Online",
     ratings: { regularity: "Good", punctuality: "Good", teaching: "Satisfactory" },
     trainerThoughts: "Network scanning session was eye-opening.",
@@ -77,7 +75,8 @@ app.get("/api/trainers", (req, res) => {
     "ALTHAF SHAJAHAN",
     "ANWAR SWADIQUE",
     "MUHAMMED RISWAN S",
-    "GOWRISHANKAR"
+    "GOWRISHANKAR",
+    "ALBIN JOSHY",
   ]);
 });
 
@@ -105,10 +104,9 @@ app.post("/api/feedback", (req, res) => {
   };
 
   feedbackDB.push(newEntry);
-  saveToFile();   // ← ADDED: saves to data.json every time feedback is submitted
+  saveToFile();
 
-  console.log(`✅  New feedback saved — ID ${newEntry.id} by ${newEntry.name}`);
-
+  console.log(`✅  New feedback — ID ${newEntry.id} by ${newEntry.name}`);
   res.json({ success: true, message: "Feedback submitted. Thank you!" });
 });
 
@@ -158,17 +156,6 @@ DEBUG_MODE=true
 BYPASS_AUTH=true
 `
   );
-});
-
-// ════════════════════════════════════════════════════════════════
-//  🔴 VULNERABILITY 4 — Exposed backup file
-// ════════════════════════════════════════════════════════════════
-app.get("/backup/feedback_backup.json", (req, res) => {
-  res.json({
-    _note:       "Auto-backup via oha-cron",
-    exported_by: "admin@offensohackersacademy.com",
-    records:     feedbackDB,
-  });
 });
 
 // ── Catch-all: SPA fallback ───────────────────────────────────────
