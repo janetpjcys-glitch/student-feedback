@@ -48,26 +48,42 @@ const matrixRatings = {
   teaching:    "",
 };
 
-// ── Email validation — accepts any valid email format ─────────────
-//    NOTE: Server-side (/api/feedback) does NOT restrict to Gmail.
-//    This client-side check mirrors that — all valid emails pass.
+// ── Email validation ──────────────────────────────────────────────
+// Accepts:  janet@gmail.com  jan@offenso.com  name@yahoo.com
+// Rejects:  jan  jan@  jan@offenso  jan@gmail  @gmail.com  test@test
 function isValidEmail(email) {
   const trimmed = email.trim();
 
-  const regex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
-  if (!regex.test(trimmed)) return false;
+  // Must contain exactly one @
+  if (!trimmed.includes("@")) return false;
+  const parts = trimmed.split("@");
+  if (parts.length !== 2) return false;
 
-  const [local, domain] = trimmed.split("@");
+  const local  = parts[0];
+  const domain = parts[1];
+
+  // Something must exist before @
   if (!local || local.length < 1) return false;
 
+  // Domain must have a dot
   if (!domain || !domain.includes(".")) return false;
-  const tld = domain.split(".").pop();
+
+  // Must have text before the dot AND a TLD of at least 2 chars after
+  const domainParts = domain.split(".");
+  const tld         = domainParts[domainParts.length - 1];
+  const domainName  = domainParts.slice(0, -1).join(".");
+
+  if (!domainName || domainName.length < 1) return false;
   if (!tld || tld.length < 2) return false;
+
+  // Full regex — rejects anything malformed
+  const regex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+  if (!regex.test(trimmed)) return false;
 
   return true;
 }
 
-// ── Show inline error under email field ───────────────────────────
+// ── Show / clear inline error under email field ───────────────────
 function showEmailError(msg) {
   let err = document.getElementById("emailError");
   if (!err) {
@@ -82,6 +98,33 @@ function showEmailError(msg) {
 function clearEmailError() {
   const err = document.getElementById("emailError");
   if (err) err.textContent = "";
+}
+
+// ── Live email validation (blur + input events) ───────────────────
+function initEmailValidation() {
+  const input = document.getElementById("emailInput");
+  if (!input) return;
+
+  // Validate when user leaves the field
+  input.addEventListener("blur", () => {
+    const val = input.value.trim();
+    if (val && !isValidEmail(val)) {
+      showEmailError("⚠ Please enter a valid email (e.g. name@gmail.com or name@offenso.com)");
+      input.style.borderColor = "#ef4444";
+    } else if (val && isValidEmail(val)) {
+      clearEmailError();
+      input.style.borderColor = "#22c55e";  // green = valid
+    } else {
+      clearEmailError();
+      input.style.borderColor = "";
+    }
+  });
+
+  // Clear error as soon as user starts typing again
+  input.addEventListener("input", () => {
+    clearEmailError();
+    input.style.borderColor = "";
+  });
 }
 
 // ── Matrix rating init ────────────────────────────────────────────
@@ -181,7 +224,8 @@ async function handleSubmit(e) {
   }
 
   if (!isValidEmail(email)) {
-    showEmailError("⚠ Please enter a valid email address.");
+    showEmailError("⚠ Please enter a valid email (e.g. name@gmail.com or name@offenso.com)");
+    document.getElementById("emailInput").style.borderColor = "#ef4444";
     document.getElementById("emailInput").focus();
     return;
   }
@@ -226,7 +270,7 @@ async function handleSubmit(e) {
 
 // ── UI Helpers ────────────────────────────────────────────────────
 function showSuccess() {
-  document.getElementById("formWrap").style.display   = "none";
+  document.getElementById("formWrap").style.display    = "none";
   document.getElementById("successWrap").style.display = "flex";
 }
 
@@ -242,6 +286,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadTrainers();
   initMatrix();
   initModeRadios();
+  initEmailValidation();   // ← this was missing in your version
   document.getElementById("feedbackForm")
     .addEventListener("submit", handleSubmit);
 });
