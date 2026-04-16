@@ -48,7 +48,7 @@ const feedbackDB = [
   {
     id: 2,
     name: "Priya Thomas",
-    email: "priya.thomas@gmail.com",
+    email: "priya.thomas@outlook.com",
     course: "ADIS",
     batchDate: "2026-04-10",
     trainer: "JANET PJ",
@@ -75,7 +75,6 @@ app.get("/api/trainers", (req, res) => {
     "ALTHAF SHAJAHAN",
     "ANWAR SWADIQUE",
     "MUHAMMED RISWAN S",
-    "GOWRISHANKAR",
     "ALBIN JOSHY",
   ]);
 });
@@ -106,28 +105,14 @@ app.post("/api/feedback", (req, res) => {
   feedbackDB.push(newEntry);
   saveToFile();
 
-  console.log(`✅  New feedback — ID ${newEntry.id} by ${newEntry.name}`);
+  console.log(`✅  New feedback saved — ID ${newEntry.id} by ${newEntry.name}`);
   res.json({ success: true, message: "Feedback submitted. Thank you!" });
 });
 
 // ════════════════════════════════════════════════════════════════
-//  🔴 VULNERABILITY 1 — Unauthenticated Admin API
-// ════════════════════════════════════════════════════════════════
-app.get("/api/admin/feedbacks", (req, res) => {
-  res.json({
-    _warning:       "INTERNAL — Do not expose this endpoint publicly.",
-    admin_email:    "admin@offensohackersacademy.com",
-    admin_password: "OHA@Admin2026",
-    db_user:        "oha_db_admin",
-    db_password:    "db$ecret_OHA99",
-    internal_notes: "Temp creds active until next migration.",
-    total_entries:  feedbackDB.length,
-    feedbacks:      feedbackDB,
-  });
-});
-
-// ════════════════════════════════════════════════════════════════
 //  🔴 VULNERABILITY 2 — Exposed .env file
+//     Served directly — simulates misconfigured web server.
+//     Discovery: type /.env in the browser address bar
 // ════════════════════════════════════════════════════════════════
 app.get("/.env", (req, res) => {
   res.type("text/plain").send(
@@ -156,6 +141,68 @@ DEBUG_MODE=true
 BYPASS_AUTH=true
 `
   );
+});
+
+// ════════════════════════════════════════════════════════════════
+//  🔴 VULNERABILITY 3 — Broken Access Control via HTTP Header
+//
+//  What it is:
+//    The /api/reports endpoint checks access using a custom
+//    HTTP header "x-user-role" instead of a real auth token.
+//    An attacker can simply set the header to "admin" and get
+//    all data — no password needed.
+//
+//  Why it's realistic:
+//    Developers sometimes use request headers for role checks
+//    during testing and forget to replace them with real auth.
+//    This is a classic Broken Access Control (OWASP Top 10 #1).
+//
+//  Discovery path:
+//    Step 1 → Open DevTools (F12) → Network tab
+//    Step 2 → Look at any API response headers
+//             You will see:  x-user-role: guest
+//    Step 3 → That "guest" hint tells you roles exist
+//    Step 4 → Try sending the request WITH the header:
+//             x-user-role: admin
+//    Step 5 → Get all feedback data — full access!
+//
+//  How to exploit (3 methods):
+//
+//  Method 1 — Browser Console (easiest):
+//    fetch("/api/reports", {
+//      headers: { "x-user-role": "admin" }
+//    }).then(r => r.json()).then(d => console.log(d))
+//
+//  Method 2 — Burp Suite:
+//    Intercept GET /api/reports
+//    Add header:  x-user-role: admin
+//    Forward → get all data
+//
+//  Method 3 — curl (terminal):
+//    curl -H "x-user-role: admin" https://your-site.com/api/reports
+// ════════════════════════════════════════════════════════════════
+app.get("/api/reports", (req, res) => {
+
+  const role = req.headers["x-user-role"];
+
+  // 🔴 VULNERABLE: trusting a client-supplied header for access control
+  if (role !== "admin") {
+    // Hint in response header — students spot this in Network tab
+    res.set("x-user-role", "guest");
+    res.set("x-hint", "Access control is header-based");
+    return res.status(403).json({
+      message: "Access denied: admin role required",
+    });
+  }
+
+  // Admin gets everything
+  res.set("x-user-role", "admin");
+  res.json({
+    _note:        "Internal report — restricted access",
+    generated_at: new Date().toISOString(),
+    total:        feedbackDB.length,
+    reports:      feedbackDB,
+  });
 });
 
 // ── Catch-all: SPA fallback ───────────────────────────────────────

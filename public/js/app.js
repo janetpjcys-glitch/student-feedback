@@ -3,6 +3,44 @@
 //   app.js
 // ================================================================
 
+// ════════════════════════════════════════════════════════════════
+//  🔴 VULNERABILITY 3 — Information Disclosure via Client-Side JS
+//
+//  What it is:
+//    A leftover debug fetch() call in the frontend source code
+//    reveals an internal admin API endpoint (/api/reports) to
+//    anyone who opens DevTools → Sources and reads this file.
+//    Combined with Vulnerability 2, it tells an attacker exactly
+//    which URL to target with the x-user-role: admin header.
+//
+//  Why it's realistic:
+//    Developers leave debug code in production builds all the time.
+//    Frontend JS is always readable by the client — there is no
+//    such thing as "hidden" client-side code.
+//
+//  Discovery path:
+//    Step 1 → Open DevTools (F12) → Sources tab
+//    Step 2 → Open app.js
+//    Step 3 → Spot the fetch("/api/reports") call near the top
+//    Step 4 → Use that endpoint with x-user-role: admin header
+//             to dump all feedback data (see Vulnerability 2)
+//
+//  How to exploit:
+//    DevTools Console:
+//      fetch("/api/reports", {
+//        headers: { "x-user-role": "admin" }
+//      }).then(r => r.json()).then(d => console.log(d))
+// ════════════════════════════════════════════════════════════════
+
+// TODO: remove before production — exposes internal admin endpoint
+const ADMIN_API = "/api/reports";
+
+// DEBUG: checking admin API response (left in by mistake — visible to all users)
+fetch(ADMIN_API)
+  .then(res => res.json())
+  .then(data => console.log("ADMIN DATA:", data))
+  .catch(() => {});
+
 // ── Matrix ratings state ──────────────────────────────────────────
 const matrixRatings = {
   regularity:  "",
@@ -10,7 +48,9 @@ const matrixRatings = {
   teaching:    "",
 };
 
-// ── Email validation — only accepts valid email formats ───────────
+// ── Email validation — accepts any valid email format ─────────────
+//    NOTE: Server-side (/api/feedback) does NOT restrict to Gmail.
+//    This client-side check mirrors that — all valid emails pass.
 function isValidEmail(email) {
   const trimmed = email.trim();
 
@@ -51,9 +91,18 @@ function initMatrix() {
       const row = el.dataset.row;
       const val = el.dataset.val;
       matrixRatings[row] = val;
-      document.querySelectorAll(`.m-radio[data-row="${row}"]`).forEach(r => r.classList.remove("checked"));
+
+      document.querySelectorAll(`.m-radio[data-row="${row}"]`)
+        .forEach(r => r.classList.remove("checked"));
+
       el.classList.add("checked");
-      const inputMap = { regularity: "ratingRegularity", punctuality: "ratingPunctuality", teaching: "ratingTeaching" };
+
+      const inputMap = {
+        regularity:  "ratingRegularity",
+        punctuality: "ratingPunctuality",
+        teaching:    "ratingTeaching",
+      };
+
       const inp = document.getElementById(inputMap[row]);
       if (inp) inp.value = val;
     });
@@ -64,19 +113,22 @@ function initMatrix() {
 function initModeRadios() {
   document.querySelectorAll(".radio-opt").forEach(opt => {
     opt.addEventListener("click", () => {
-      document.querySelectorAll(".radio-opt").forEach(o => o.classList.remove("selected"));
+      document.querySelectorAll(".radio-opt")
+        .forEach(o => o.classList.remove("selected"));
+
       opt.classList.add("selected");
       opt.querySelector("input[type='radio']").checked = true;
     });
   });
 }
 
-// ── Load trainers ─────────────────────────────────────────────────
+// ── Load trainers from public API ─────────────────────────────────
 async function loadTrainers() {
   try {
     const res      = await fetch("/api/trainers");
     const trainers = await res.json();
     const sel      = document.getElementById("trainerSelect");
+
     trainers.forEach(name => {
       const opt       = document.createElement("option");
       opt.value       = name;
@@ -87,6 +139,23 @@ async function loadTrainers() {
     console.error("Could not load trainers:", e);
   }
 }
+
+// ════════════════════════════════════════════════════════════════
+//  💡 STUDENT HINT — How to find Vulnerability 2
+//
+//  After submitting feedback (or any API call), open:
+//    DevTools (F12) → Network tab → click the /api/reports request
+//    → Response Headers
+//
+//  You will see:
+//    x-user-role: guest
+//    x-hint: Access control is header-based
+//
+//  That header leaks the role name used by the server.
+//  Try resending the request with:
+//    x-user-role: admin
+//  ... and observe what changes in the response.
+// ════════════════════════════════════════════════════════════════
 
 // ── Submit ────────────────────────────────────────────────────────
 async function handleSubmit(e) {
@@ -111,21 +180,19 @@ async function handleSubmit(e) {
     return;
   }
 
-  // ── STRICT GMAIL-ONLY VALIDATION ─────────────────────────────
   if (!isValidEmail(email)) {
-    showEmailError("⚠ Only Gmail addresses are accepted (e.g. name@gmail.com)");
+    showEmailError("⚠ Please enter a valid email address.");
     document.getElementById("emailInput").focus();
-    document.getElementById("emailInput").style.borderColor = "#ef4444";
     return;
   }
 
   if (!matrixRatings.regularity || !matrixRatings.punctuality || !matrixRatings.teaching) {
-    toast("Please rate all criteria in the rating table.", "err");
+    toast("Please rate all criteria.", "err");
     return;
   }
 
   if (!trainerThoughts || !challenges || !nonTech || !suggestions) {
-    toast("Please answer all required feedback questions.", "err");
+    toast("Please answer all required questions.", "err");
     return;
   }
 
@@ -134,7 +201,7 @@ async function handleSubmit(e) {
   btn.textContent = "Submitting…";
 
   try {
-    const res  = await fetch("/api/feedback", {
+    const res = await fetch("/api/feedback", {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -144,42 +211,22 @@ async function handleSubmit(e) {
         additionalSupport: additional, suggestions,
       }),
     });
+
     const data = await res.json();
     if (data.success) showSuccess();
-    else toast("Submission failed. Please try again.", "err");
-  } catch (err) {
-    toast("Network error. Please try again.", "err");
+    else toast("Submission failed.", "err");
+
+  } catch {
+    toast("Network error.", "err");
   } finally {
     btn.disabled    = false;
     btn.textContent = "Submit Feedback →";
   }
 }
 
-// ── Live email validation on blur ─────────────────────────────────
-function initEmailValidation() {
-  const input = document.getElementById("emailInput");
-  if (!input) return;
-
-  input.addEventListener("blur", () => {
-    const val = input.value.trim();
-    if (val && !isValidEmail(val)) {
-      showEmailError("⚠ Only Gmail addresses are accepted (e.g. name@gmail.com)");
-      input.style.borderColor = "#ef4444";
-    } else {
-      clearEmailError();
-      input.style.borderColor = "";
-    }
-  });
-
-  input.addEventListener("input", () => {
-    clearEmailError();
-    input.style.borderColor = "";
-  });
-}
-
 // ── UI Helpers ────────────────────────────────────────────────────
 function showSuccess() {
-  document.getElementById("formWrap").style.display    = "none";
+  document.getElementById("formWrap").style.display   = "none";
   document.getElementById("successWrap").style.display = "flex";
 }
 
@@ -187,7 +234,7 @@ function toast(msg, type = "ok") {
   const t = document.getElementById("toast");
   t.textContent = msg;
   t.className   = `toast show ${type}`;
-  setTimeout(() => t.classList.remove("show"), 3800);
+  setTimeout(() => t.classList.remove("show"), 3000);
 }
 
 // ── Init ──────────────────────────────────────────────────────────
@@ -195,6 +242,6 @@ document.addEventListener("DOMContentLoaded", () => {
   loadTrainers();
   initMatrix();
   initModeRadios();
-  initEmailValidation();
-  document.getElementById("feedbackForm").addEventListener("submit", handleSubmit);
+  document.getElementById("feedbackForm")
+    .addEventListener("submit", handleSubmit);
 });
