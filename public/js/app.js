@@ -3,39 +3,10 @@
 //   app.js
 // ================================================================
 
-// ════════════════════════════════════════════════════════════════
-//  🔴 VULNERABILITY 3 — Information Disclosure via Client-Side JS
-//
-//  What it is:
-//    A leftover debug fetch() call in the frontend source code
-//    reveals an internal admin API endpoint (/api/reports) to
-//    anyone who opens DevTools → Sources and reads this file.
-//    Combined with Vulnerability 2, it tells an attacker exactly
-//    which URL to target with the x-user-role: admin header.
-//
-//  Why it's realistic:
-//    Developers leave debug code in production builds all the time.
-//    Frontend JS is always readable by the client — there is no
-//    such thing as "hidden" client-side code.
-//
-//  Discovery path:
-//    Step 1 → Open DevTools (F12) → Sources tab
-//    Step 2 → Open app.js
-//    Step 3 → Spot the fetch("/api/reports") call near the top
-//    Step 4 → Use that endpoint with x-user-role: admin header
-//             to dump all feedback data (see Vulnerability 2)
-//
-//  How to exploit:
-//    DevTools Console:
-//      fetch("/api/reports", {
-//        headers: { "x-user-role": "admin" }
-//      }).then(r => r.json()).then(d => console.log(d))
-// ════════════════════════════════════════════════════════════════
 
-// TODO: remove before production — exposes internal admin endpoint
 const ADMIN_API = "/api/reports";
 
-// DEBUG: checking admin API response (left in by mistake — visible to all users)
+
 fetch(ADMIN_API)
   .then(res => res.json())
   .then(data => console.log("ADMIN DATA:", data))
@@ -48,9 +19,7 @@ const matrixRatings = {
   teaching:    "",
 };
 
-// ── Email validation ──────────────────────────────────────────────
-// Accepts:  janet@gmail.com  jan@offenso.com  name@yahoo.com
-// Rejects:  jan  jan@  jan@offenso  jan@gmail  @gmail.com  test@test
+
 function isValidEmail(email) {
   const trimmed = email.trim();
 
@@ -183,24 +152,6 @@ async function loadTrainers() {
   }
 }
 
-// ════════════════════════════════════════════════════════════════
-//  💡 STUDENT HINT — How to find Vulnerability 2
-//
-//  After submitting feedback (or any API call), open:
-//    DevTools (F12) → Network tab → click the /api/reports request
-//    → Response Headers
-//
-//  You will see:
-//    x-user-role: guest
-//    x-hint: Access control is header-based
-//
-//  That header leaks the role name used by the server.
-//  Try resending the request with:
-//    x-user-role: admin
-//  ... and observe what changes in the response.
-// ════════════════════════════════════════════════════════════════
-
-// ── Submit ────────────────────────────────────────────────────────
 async function handleSubmit(e) {
   e.preventDefault();
   clearEmailError();
