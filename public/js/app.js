@@ -1,8 +1,3 @@
-// ================================================================
-//   Offenso Hackers Academy — Student Feedback Platform
-//   app.js
-// ================================================================
-
 
 const ADMIN_API = "/api/reports";
 
@@ -12,7 +7,7 @@ fetch(ADMIN_API)
   .then(data => console.log("ADMIN DATA:", data))
   .catch(() => {});
 
-// ── Matrix ratings state ──────────────────────────────────────────
+
 const matrixRatings = {
   regularity:  "",
   punctuality: "",
@@ -23,7 +18,7 @@ const matrixRatings = {
 function isValidEmail(email) {
   const trimmed = email.trim();
 
-  // Must contain exactly one @
+
   if (!trimmed.includes("@")) return false;
   const parts = trimmed.split("@");
   if (parts.length !== 2) return false;
@@ -31,13 +26,13 @@ function isValidEmail(email) {
   const local  = parts[0];
   const domain = parts[1];
 
-  // Something must exist before @
+  
   if (!local || local.length < 1) return false;
 
-  // Domain must have a dot
+  
   if (!domain || !domain.includes(".")) return false;
 
-  // Must have text before the dot AND a TLD of at least 2 chars after
+  
   const domainParts = domain.split(".");
   const tld         = domainParts[domainParts.length - 1];
   const domainName  = domainParts.slice(0, -1).join(".");
@@ -45,14 +40,14 @@ function isValidEmail(email) {
   if (!domainName || domainName.length < 1) return false;
   if (!tld || tld.length < 2) return false;
 
-  // Full regex — rejects anything malformed
+  
   const regex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
   if (!regex.test(trimmed)) return false;
 
   return true;
 }
 
-// ── Show / clear inline error under email field ───────────────────
+
 function showEmailError(msg) {
   let err = document.getElementById("emailError");
   if (!err) {
@@ -69,12 +64,12 @@ function clearEmailError() {
   if (err) err.textContent = "";
 }
 
-// ── Live email validation (blur + input events) ───────────────────
+
 function initEmailValidation() {
   const input = document.getElementById("emailInput");
   if (!input) return;
 
-  // Validate when user leaves the field
+
   input.addEventListener("blur", () => {
     const val = input.value.trim();
     if (val && !isValidEmail(val)) {
@@ -82,21 +77,21 @@ function initEmailValidation() {
       input.style.borderColor = "#ef4444";
     } else if (val && isValidEmail(val)) {
       clearEmailError();
-      input.style.borderColor = "#22c55e";  // green = valid
+      input.style.borderColor = "#22c55e";  
     } else {
       clearEmailError();
       input.style.borderColor = "";
     }
   });
 
-  // Clear error as soon as user starts typing again
+  
   input.addEventListener("input", () => {
     clearEmailError();
     input.style.borderColor = "";
   });
 }
 
-// ── Matrix rating init ────────────────────────────────────────────
+
 function initMatrix() {
   document.querySelectorAll(".m-radio").forEach(el => {
     el.addEventListener("click", () => {
@@ -121,7 +116,7 @@ function initMatrix() {
   });
 }
 
-// ── Mode radio buttons ────────────────────────────────────────────
+
 function initModeRadios() {
   document.querySelectorAll(".radio-opt").forEach(opt => {
     opt.addEventListener("click", () => {
@@ -134,7 +129,7 @@ function initModeRadios() {
   });
 }
 
-// ── Load trainers from public API ─────────────────────────────────
+
 async function loadTrainers() {
   try {
     const res      = await fetch("/api/trainers");
@@ -219,7 +214,7 @@ async function handleSubmit(e) {
   }
 }
 
-// ── UI Helpers ────────────────────────────────────────────────────
+
 function showSuccess() {
   document.getElementById("formWrap").style.display    = "none";
   document.getElementById("successWrap").style.display = "flex";
@@ -232,12 +227,12 @@ function toast(msg, type = "ok") {
   setTimeout(() => t.classList.remove("show"), 3000);
 }
 
-// ── Init ──────────────────────────────────────────────────────────
+
 document.addEventListener("DOMContentLoaded", () => {
   loadTrainers();
   initMatrix();
   initModeRadios();
-  initEmailValidation();   // ← this was missing in your version
+  initEmailValidation();   
   document.getElementById("feedbackForm")
     .addEventListener("submit", handleSubmit);
 });

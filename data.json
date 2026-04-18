@@ -1,37 +1,19 @@
 {
   "_note": "Static seed data — loaded on server start",
   "trainers": [
-    "AJITH V",
-    "ASHISH",
-    "SOORAJ",
-    "SREEDEVI",
-    "FATHIMA THAZNEEM",
-    "JANET PJ",
-    "ALTHAF",
-    "ANWAR",
-    "RAJAB",
-    "GHEEVARGHESE",
-    "ANANDHU",
-    "RISWAN"
-  ],
-  "sample_feedbacks": [
-    {
-      "id": 1,
-      "trainer": "Web Exploitation Trainer",
-      "rating": 5,
-      "feedback": "The SQL injection lab was incredibly well structured.",
-      "email": "arjun.nair@gmail.com",
-      "submitted_at": "2026-04-10T09:15:00Z"
-    },
-    {
-      "id": 2,
-      "trainer": "Cyber Security Trainer",
-      "rating": 4,
-      "feedback": "Network scanning session was eye-opening.",
-      "email": "priya.thomas@outlook.com",
-      "submitted_at": "2026-04-10T11:30:00Z"
-    }
-  ],
+  "AJITH V",
+  "ASHISH THOMAS JOSEPH",
+  "SOORAJ K",
+  "SREEDEVI S NAIR",
+  "FATHIMA THAZNEEM",
+  "JANET PJ",
+  "ALTHAF SHAJAHAN",
+  "ANWAR SWADIQUE",
+  "MUHAMMED RISWAN S",
+  "GOURISHANKAR",
+  "ALBIN JOSHY"
+],
+ 
   "feedbacks": [
     {
       "id": 1,
